@@ -125,6 +125,25 @@ def retirar_vehiculo():
     
     input("Presione Enter para volver al menú...")
 
+def ver_estado_estacionamiento():
+    limpiar_pantalla()
+    print("--- ESTADO DEL ESTACIONAMIENTO ---")
+    print(f"Capacidad Total: {CAPACIDAD_MAXIMA} | Espacios Libres: {CAPACIDAD_MAXIMA - sum(1 for v in espacios.values() if v is not None)}\n")
+    
+    print(f"{'Espacio':<10} | {'Patente':<10} | {'Hora Ingreso':<20} | {'Estado'}")
+    print("-" * 60)
+    
+    for i in range(1, CAPACIDAD_MAXIMA + 1):
+        espacio_str = str(i)
+        if espacios[espacio_str] is not None:
+            datos = espacios[espacio_str]
+            hora = datos['tiempo_ingreso'].strftime('%d/%m/%Y %H:%M')
+            print(f"{espacio_str:<10} | {datos['patente']:<10} | {hora:<20} | [OCUPADO]")
+        else:
+            print(f"{espacio_str:<10} | {'---':<10} | {'---':<20} | [LIBRE]")
+    
+    input("\nPresione Enter para volver al menú...")
+
 def mostrar_menu():
     print("\n" + "="*30)
     print("  SISTEMA DE ESTACIONAMIENTO")
@@ -148,8 +167,7 @@ def main():
         elif opcion == "2":
             retirar_vehiculo()
         elif opcion == "3":
-            print(">> Ver estado (próximamente)")
-            input("Presione Enter para volver al menú...")
+            ver_estado_estacionamiento()
         elif opcion == "4":
             print(">> Estadísticas (próximamente)")
             input("Presione Enter para volver al menú...")

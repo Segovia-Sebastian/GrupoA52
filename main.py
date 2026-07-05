@@ -1,7 +1,49 @@
 import os
+import datetime
 
+# CONSTANTES Y CONFIGURACIÓN
+CAPACIDAD_MAXIMA = 20
+COSTO_POR_HORA = 1500.00
+MINUTO_MINIMO_COBRO = 15
+
+# ESTRUCTURAS DE DATOS
+espacios = {str(i): None for i in range(1, CAPACIDAD_MAXIMA + 1)}
+
+# ==========================================
+# FUNCIONES AUXILIARES
+# ==========================================
 def limpiar_pantalla():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+# FUNCIONES PRINCIPALES DEL SISTEMA
+def ingresar_vehiculo():
+    limpiar_pantalla()
+    print("--- INGRESO DE VEHÍCULO ---")
+    
+    patente = input("Ingrese la patente del vehículo: ").upper().strip()
+    
+    # Buscar primer espacio libre
+    espacio_asignado = None
+    for i in range(1, CAPACIDAD_MAXIMA + 1):
+        if espacios[str(i)] is None:
+            espacio_asignado = str(i)
+            break
+    
+    if espacio_asignado is None:
+        print("\nEl estacionamiento está COMPLETO.")
+        input("Presione Enter para volver al menú...")
+        return
+    
+    tiempo_ingreso = datetime.datetime.now()
+    espacios[espacio_asignado] = {
+        'patente': patente,
+        'tiempo_ingreso': tiempo_ingreso
+    }
+    
+    print(f"\nVehículo ingresado en espacio {espacio_asignado}.")
+    print(f"Patente: {patente}")
+    print(f"Hora: {tiempo_ingreso.strftime('%d/%m/%Y %H:%M:%S')}")
+    input("\nPresione Enter para volver al menú...")
 
 def mostrar_menu():
     print("\n" + "="*30)
@@ -22,16 +64,15 @@ def main():
         opcion = input("Seleccione una opción (1-5): ")
         
         if opcion == "1":
-            print(">> Ingresar vehículo")
-            input("Presione Enter para volver al menú...")
+            ingresar_vehiculo()
         elif opcion == "2":
-            print(">> Retirar vehículo ")
+            print(">> Retirar vehículo (próximamente)")
             input("Presione Enter para volver al menú...")
         elif opcion == "3":
-            print(">> Ver estado ")
+            print(">> Ver estado (próximamente)")
             input("Presione Enter para volver al menú...")
         elif opcion == "4":
-            print(">> Estadísticas")
+            print(">> Estadísticas (próximamente)")
             input("Presione Enter para volver al menú...")
         elif opcion == "5":
             print("\nSaliendo del sistema. ¡Gracias por usar nuestro software!")

@@ -9,40 +9,70 @@ MINUTO_MINIMO_COBRO = 15
 # ESTRUCTURAS DE DATOS
 espacios = {str(i): None for i in range(1, CAPACIDAD_MAXIMA + 1)}
 
-# ==========================================
-# FUNCIONES AUXILIARES
-# ==========================================
+# FUNCIONES AUXILIARES Y DE VALIDACIÓN
 def limpiar_pantalla():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+def validar_patente(patente):
+    patente = patente.upper().strip()
+    if len(patente) < 6 or len(patente) > 7:
+        return False, "La patente debe tener 6 o 7 caracteres."
+    if not patente.isalnum():
+        return False, "La patente solo puede contener letras y números."
+    return True, patente
+
+def buscar_vehiculo_por_patente(patente):
+    for espacio, datos in espacios.items():
+        if datos is not None and datos['patente'] == patente:
+            return espacio
+    return None
 
 # FUNCIONES PRINCIPALES DEL SISTEMA
 def ingresar_vehiculo():
     limpiar_pantalla()
     print("--- INGRESO DE VEHÍCULO ---")
     
-    patente = input("Ingrese la patente del vehículo: ").upper().strip()
+    # Validar capacidad
+    espacios_ocupados = sum(1 for v in espacios.values() if v is not None)
+    if espacios_ocupados >= CAPACIDAD_MAXIMA:
+        print("\n[ERROR] El estacionamiento está COMPLETO.")
+        input("Presione Enter para volver al menú...")
+        return
     
-    # Buscar primer espacio libre
+    # Solicitar y validar patente
+    while True:
+        patente_input = input("Ingrese la patente del vehículo (6 o 7 caracteres): ")
+        es_valida, resultado = validar_patente(patente_input)
+        
+        if not es_valida:
+            print(f"[ERROR] {resultado}")
+        else:
+            patente = resultado
+            break
+    
+    # Validar duplicado
+    if buscar_vehiculo_por_patente(patente) is not None:
+        print(f"\n[ERROR] El vehículo con patente {patente} ya está dentro.")
+        input("Presione Enter para volver al menú...")
+        return
+    
+    # Asignar espacio
     espacio_asignado = None
     for i in range(1, CAPACIDAD_MAXIMA + 1):
         if espacios[str(i)] is None:
             espacio_asignado = str(i)
-            break
-    
-    if espacio_asignado is None:
-        print("\nEl estacionamiento está COMPLETO.")
-        input("Presione Enter para volver al menú...")
-        return
-    
+            break 
+
     tiempo_ingreso = datetime.datetime.now()
     espacios[espacio_asignado] = {
         'patente': patente,
         'tiempo_ingreso': tiempo_ingreso
     }
     
-    print(f"\nVehículo ingresado en espacio {espacio_asignado}.")
+    print(f"\n[ÉXITO] Vehículo ingresado correctamente.")
     print(f"Patente: {patente}")
-    print(f"Hora: {tiempo_ingreso.strftime('%d/%m/%Y %H:%M:%S')}")
+    print(f"Espacio asignado: {espacio_asignado}")
+    print(f"Hora de ingreso: {tiempo_ingreso.strftime('%d/%m/%Y %H:%M:%S')}")
     input("\nPresione Enter para volver al menú...")
 
 def mostrar_menu():

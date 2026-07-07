@@ -1,26 +1,26 @@
 import os
-import gestion  # Importamos las funciones de gestión desde el módulo gestion.py
+import datetime
+import gestion
 
-# FUNCIONES AUXILIARES DE UI
-
-def limpiar_pantalla(): # Limpia la consola
+def limpiar_pantalla():
+    # limpia la consola
     os.system('cls' if os.name == 'nt' else 'clear')
-    
-# FUNCIONES PRINCIPALES DEL SISTEMA
+
 def ingresar_vehiculo():
+    # pide la patente, valida y guarda el auto en un espacio libre
     limpiar_pantalla()
     print("--- INGRESO DE VEHÍCULO ---")
     
-    # 1. Validar capacidad (Contador/Condición)
+    # revisamos si hay lugar disponible
     espacios_ocupados = sum(1 for v in gestion.espacios.values() if v is not None)
     if espacios_ocupados >= gestion.CAPACIDAD_MAXIMA:
-        print("\n[ERROR] El estacionamiento está COMPLETO. No se puede ingresar más vehículos.")
-        input("Presione Enter para volver al menu...")
+        print("\n[ERROR] El estacionamiento está COMPLETO.")
+        input("Presione Enter para volver al menú...")
         return
 
-    # 2. Solicitar y validar patente (Validación/Bucle)
+    # pedimos la patente hasta que sea válida
     while True:
-        patente_input = input("Ingrese la patente del vehiculo (6 o 7 caracteres): ")
+        patente_input = input("Ingrese la patente del vehículo (6 o 7 caracteres): ")
         es_valida, resultado = gestion.validar_patente(patente_input)
         
         if not es_valida:
@@ -29,55 +29,53 @@ def ingresar_vehiculo():
             patente = resultado
             break
 
-    # 3. Validar si el vehículo ya está adentro (Validación)
+    # vemos si el auto ya está adentro
     if gestion.buscar_vehiculo_por_patente(patente) is not None:
-        print(f"\n[ERROR] El vehiculo con patente {patente} ya se encuentra dentro del estacionamiento.")
-        input("Presione Enter para volver al menu...")
+        print(f"\n[ERROR] El vehículo con patente {patente} ya está dentro.")
+        input("Presione Enter para volver al menú...")
         return
 
-    # 4. Asignar espacio (Bucle/Condición)
+    # buscamos el primer lugar libre
     espacio_asignado = None
     for i in range(1, gestion.CAPACIDAD_MAXIMA + 1):
         if gestion.espacios[str(i)] is None:
             espacio_asignado = str(i)
             break
 
-    # 5. Registrar ingreso
-    import datetime
+    # guardamos los datos del ingreso
     tiempo_ingreso = datetime.datetime.now()
     gestion.espacios[espacio_asignado] = {
         'patente': patente,
         'tiempo_ingreso': tiempo_ingreso
     }
 
-    print(f"\n[ÉXITO] Vehiculo ingresado correctamente.")
+    print(f"\n[ÉXITO] Vehículo ingresado correctamente.")
     print(f"Patente: {patente}")
     print(f"Espacio asignado: {espacio_asignado}")
     print(f"Hora de ingreso: {tiempo_ingreso.strftime('%d/%m/%Y %H:%M:%S')}")
     input("\nPresione Enter para volver al menú...")
 
-# Gestiona el retiro de un vehículo del estacionamiento
 def retirar_vehiculo():
+    # busca el auto, calcula el pago y lo retira si confirma
     limpiar_pantalla()
     print("--- RETIRO DE VEHÍCULO ---")
     
-    patente_input = input("Ingrese la patente del vehiculo a retirar: ").upper().strip()
+    patente_input = input("Ingrese la patente del vehículo a retirar: ").upper().strip()
     
-    # 1. Buscar vehículo
+    # buscamos en qué espacio está
     espacio = gestion.buscar_vehiculo_por_patente(patente_input)
     
     if espacio is None:
-        print(f"\n[ERROR] No se encontro ningun vehiculo con la patente {patente_input}.")
-        input("Presione Enter para volver al menu...")
+        print(f"\n[ERROR] No se encontró ningún vehículo con la patente {patente_input}.")
+        input("Presione Enter para volver al menú...")
         return
 
-    # 2. Calcular tiempo y costo (Acumuladores/Fórmulas)
-    import datetime
+    # calculamos el tiempo y el costo
     datos_vehiculo = gestion.espacios[espacio]
     tiempo_salida = datetime.datetime.now()
     costo, minutos = gestion.calcular_costo(datos_vehiculo['tiempo_ingreso'], tiempo_salida)
 
-    # 3. Mostrar ticket y confirmar
+    # mostramos el ticket
     print(f"\n--- TICKET DE SALIDA ---")
     print(f"Patente: {patente_input}")
     print(f"Espacio: {espacio}")
@@ -87,30 +85,32 @@ def retirar_vehiculo():
     if costo == 0:
         print("(Permanencia dentro del tiempo de gracia)")
 
-    confirmacion = input("\n¿Confirma el pago y retiro del vehiculo? (s/n): ").lower()
+    # confirmamos el retiro
+    confirmacion = input("\n¿Confirma el pago y retiro del vehículo? (s/n): ").lower()
     
     if confirmacion == 's':
-        # 4. Liberar espacio y guardar en historial
         gestion.espacios[espacio] = None
-        # Guardar para estadísticas (Acumulador de datos)
         gestion.historial_estadisticas.append({
             'patente': patente_input,
             'minutos': minutos,
             'costo': costo,
             'fecha': tiempo_salida
         })
-        
-        print("\n[EXITO] Pago registrado. Vehículo retirado correctamente.")
+        print("\n[ÉXITO] Pago registrado. Vehículo retirado correctamente.")
     else:
         print("\n[INFO] Operación cancelada. El vehículo permanece en el estacionamiento.")
         
-    input("Presione Enter para volver al menu...")
+    input("Presione Enter para volver al menú...")
 
-# Muestra el estado actual del estacionamiento
 def ver_estado_estacionamiento():
+    # muestra la tabla con los espacios libres y ocupados
     limpiar_pantalla()
     print("--- ESTADO DEL ESTACIONAMIENTO ---")
-    print(f"Capacidad Total: {gestion.CAPACIDAD_MAXIMA} | Espacios Libres: {gestion.CAPACIDAD_MAXIMA - sum(1 for v in gestion.espacios.values() if v is not None)}\n")
+    
+    ocupados = sum(1 for v in gestion.espacios.values() if v is not None)
+    libres = gestion.CAPACIDAD_MAXIMA - ocupados
+    
+    print(f"Capacidad Total: {gestion.CAPACIDAD_MAXIMA} | Ocupados: {ocupados} | Libres: {libres}\n")
     
     print(f"{'Espacio':<10} | {'Patente':<10} | {'Hora Ingreso':<20} | {'Estado'}")
     print("-" * 60)
@@ -126,56 +126,56 @@ def ver_estado_estacionamiento():
             
     input("\nPresione Enter para volver al menú...")
 
-# Muestra estadísticas del estacionamiento
 def mostrar_estadisticas():
+    # muestra los totales de autos atendidos, recaudación y ocupación
     limpiar_pantalla()
     print("--- ESTADÍSTICAS DEL ESTACIONAMIENTO ---")
     
     total_vehiculos = len(gestion.historial_estadisticas)
     
     if total_vehiculos == 0:
-        print("Aun no se ha retirado ningún vehículo. No hay estadísticas para mostrar.")
+        print("Aún no se ha retirado ningún vehículo. No hay estadísticas.")
         input("\nPresione Enter para volver al menú...")
         return
 
-    # Acumuladores
+    # calculamos los totales
     recaudacion_total = sum(v['costo'] for v in gestion.historial_estadisticas)
     tiempo_total_minutos = sum(v['minutos'] for v in gestion.historial_estadisticas)
     promedio_permanencia = tiempo_total_minutos / total_vehiculos
     
-    # Ocupación actual
+    # calculamos la ocupación actual
     espacios_ocupados = sum(1 for v in gestion.espacios.values() if v is not None)
     porcentaje_ocupacion = (espacios_ocupados / gestion.CAPACIDAD_MAXIMA) * 100
 
     print(f"Vehículos atendidos (retirados): {total_vehiculos}")
-    print(f"Recaudación total:             ${recaudacion_total:.2f}")
-    print(f"Tiempo promedio de permanencia: {promedio_permanencia:.1f} minutos")
-    print(f"Ocupación actual:               {espacios_ocupados}/{gestion.CAPACIDAD_MAXIMA} ({porcentaje_ocupacion:.1f}%)")
+    print(f"Recaudación total:               ${recaudacion_total:.2f}")
+    print(f"Tiempo promedio de permanencia:  {promedio_permanencia:.1f} minutos")
+    print(f"Ocupación actual:                {espacios_ocupados}/{gestion.CAPACIDAD_MAXIMA} ({porcentaje_ocupacion:.1f}%)")
     
     input("\nPresione Enter para volver al menú...")
 
-# MENÚ PRINCIPAL Y PUNTO DE ENTRADA
 def mostrar_menu():
-    print("\n" + "="*30)
+    # muestra las opciones del menú principal
+    print("\n" + "=" * 30)
     print("  SISTEMA DE ESTACIONAMIENTO")
-    print("="*30)
-    print("1. Ingresar vehiculo")
-    print("2. Retirar vehiculo")
+    print("=" * 30)
+    print("1. Ingresar vehículo")
+    print("2. Retirar vehículo")
     print("3. Ver estado del estacionamiento")
-    print("4. Ver estadisticas")
+    print("4. Ver estadísticas")
     print("5. Salir del sistema")
-    print("="*30)
+    print("=" * 30)
 
 def main():
+    # controla el flujo del menú
     while True:
         limpiar_pantalla()
         mostrar_menu()
         
-        # Manejo básico de errores y validaciones de menú
         try:
             opcion = int(input("Seleccione una opción (1-5): "))
         except ValueError:
-            print("\n[ERROR] Debe ingresar un numero entero valido.")
+            print("\n[ERROR] Debe ingresar un número entero válido.")
             input("Presione Enter para intentar de nuevo...")
             continue
 
@@ -191,7 +191,7 @@ def main():
             print("\nSaliendo del sistema. ¡Gracias por usar nuestro software!")
             break
         else:
-            print("\n[ERROR] Opción no valida. Por favor, elija entre 1 y 5.")
+            print("\n[ERROR] Opción no válida. Por favor, elija entre 1 y 5.")
             input("Presione Enter para intentar de nuevo...")
 
 if __name__ == "__main__":

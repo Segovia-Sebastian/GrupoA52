@@ -23,6 +23,7 @@ El código está separado en dos archivos para mantener el orden:
 3. Ejecutar el siguiente comando:
    ```bash
    python main.py
+   "deben copiarlo tal cual esta", Otra forma es abrir el proyecto en un editor de código (como Visual Studio Code) y ejecutar el archivo main.py
 
 # Link del video
 - https://youtu.be/gdsIi7gEpPo

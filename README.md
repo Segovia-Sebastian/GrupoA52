@@ -6,8 +6,8 @@
 - Marcos Sebastian Márquez
 - Albertini, Alan Gabriel
 
-# Comisión: A
-# Grupo 6
+## Comisión: A
+## Grupo 6
 
 # Descripción
 Sistema desarrollado en Python para administrar el funcionamiento de un estacionamiento. Permite gestionar el ingreso y egreso de vehículos, calcular el tiempo de permanencia, controlar los espacios disponibles y liquidar los importes a pagar. También incluye un módulo de estadísticas para ver la recaudación y ocupación.
@@ -23,6 +23,11 @@ El código está separado en dos archivos para mantener el orden:
 3. Ejecutar el siguiente comando:
    ```bash
    python main.py
+   "deben copiarlo tal cual esta", Otra forma es abrir el proyecto en un editor de código (como Visual Studio Code) y ejecutar el archivo main.py
+
+# ¿Donde se aplico el uso de IA?
+Para el desarrollo de este proyecto utilizamos el modelo de lenguaje Qwen como herramienta de apoyo. La IA se empleó principalmente para agilizar la resolución de problemas algorítmicos complejos y para la depuración de errores.
+La IA en si, a veces presentaba ciertos delirios y provocaba confuciones, pero para resoluciones que eran simples cumplia con su funcionamiento. 
 
 # Link del video
 - https://youtu.be/gdsIi7gEpPo
